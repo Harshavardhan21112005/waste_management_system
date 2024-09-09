@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Management Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Background color for the entire page */
+        /* Background image for the entire page */
+/* Background image for the entire page */
+html, body {
+    height: 100%; /* Ensures that the body element spans the full height of the viewport */
+    margin: 0; /* Removes default margin */
+}
+
+body {
+    background-image: url('background.jpg');
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents repeating the image */
+    margin: 0; /* Removes default margin */
+    padding: 0; /* Removes default padding */
+    font-family: Arial, sans-serif;
+}
+
+
+
+
+        /* Style for the map */
+        #map {
+            height: 400px; /* Adjusted height */
+            width: 90%; /* Adjusted width for better padding */
+            margin: 20px auto; /* Centered map with top and bottom margin */
+            box-shadow: 0 4px 8px rgb(248, 238, 238); /* Shadow effect */
+            border-radius: 15px; /* Curved corners */
+        }
+
+        /* Header with improved dark green color and shadow */
+        .header {
+            background-color: #096509; /* Dark green */
+            padding: 20px;
+            text-align: center;
+            box-shadow: white;
+            box-shadow: 0 4px 8px rgb(239, 229, 229); /* Shadow effect */
+            margin-bottom: 20px; /* Gap between header and map */
+            border-radius: 15px; /* Curved corners */
+        }
+
+        /* Style for the icon and title in header */
+        .header img {
+            width: 70px; /* Increased size of the icon */
+            vertical-align: middle;
+        }
+
+        .header h1 {
+            display: inline;
+            margin-left: 10px;
+            font-size: 36px;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        /* Center the info labels container */
+        .info-labels {
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Style for individual labels */
+        .info-labels span {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 5px 10px;
+            border-radius: 10px; /* Curved corners */
+            color: white;
+            font-weight: bold;
+            cursor: pointer; /* Hand cursor on hover */
+        }
+
+        /* Specific color styles for each label */
+        .full {
+            background-color: red;
+        }
+
+        .not-full {
+            background-color: green;
+        }
+
+        .empty-scattered {
+            background-color: darkgreen;
+        }
+
+        .full-scattered {
+            background-color: orange;
+        }
+
+        /* Style for buttons */
+        .recenter-btn button, .compass-controls button {
+            margin: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        /* Zoom effect on label hover */
+        .info-labels span:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header with image and title center aligned -->
+    <div class="header">
+        <img src="trash_icon.jpg" alt="Trash Icon">
+        <h1>TRASH TRACKERS</h1>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Centered and styled info labels -->
+    <div class="info-labels">
+        <span class="full">Full Dustbin</span>
+        <span class="not-full">Not Full Dustbin</span>
+        <span class="empty-scattered">Empty Scattered</span>
+        <span class="full-scattered">Full Scattered</span>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map with new center coordinates
+        var map = L.map('map').setView([11.0168, 76.9558], 16); // Coimbatore center coordinates
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Define the center point and 200m radius circle
+        var centerLatLng = [11.0168, 76.9558]; // Coimbatore center coordinates
+        var radius = 200;
+        var originalCenter = L.latLng(centerLatLng);
+
+        // Draw a circle to represent the 200-meter radius
+        var circle = L.circle(centerLatLng, {
+            color: '#4caf50',
+            fillColor: '#4caf50',
+            fillOpacity: 0.2,
+            radius: radius
+        }).addTo(map);
+
+        // Function to get new coordinates for random dustbin placement
+        function getNewCoordinates(center, distance, angle) {
+            var angleInRadians = angle * (Math.PI / 180);
+            var newLat = center[0] + (distance / 111320) * Math.cos(angleInRadians);
+            var newLng = center[1] + (distance / (111320 * Math.cos(center[0] * (Math.PI / 180)))) * Math.sin(angleInRadians);
+            return [newLat, newLng];
+        }
+
+        // Function to place random dustbins based on integer array
+        function placeRandomDustbins(integerArray) {
+            const minInterval = 30.48; // Minimum distance in meters (100 feet)
+            const maxInterval = 182.88; // Maximum distance in meters (600 feet)
+
+            for (let i = 0; i < integerArray.length; i++) {
+                const randomDistance = Math.random() * (maxInterval - minInterval) + minInterval;
+                const randomAngle = Math.random() * 360;
+                const binLocation = getNewCoordinates(centerLatLng, randomDistance, randomAngle);
+
+                var dustbinColor;
+                switch (integerArray[i]) {
+                    case 0:
+                        dustbinColor = 'green'; // Not Full
+                        break;
+                    case 1:
+                        dustbinColor = 'darkgreen'; // Empty Scattered
+                        break;
+                    case 2:
+                        dustbinColor = 'red'; // Full
+                        break;
+                    case 3:
+                        dustbinColor = 'orange'; // Full Scattered
+                        break;
+                    default:
+                        continue; // Skip if color is black or invalid
+                }
+
+                L.marker(binLocation, {
+                    icon: L.divIcon({
+                        className: 'dustbin-icon',
+                        html: `<div style="background-color: ${dustbinColor}; width: 10px; height: 10px; border-radius: 50%;"></div>`,
+                        iconSize: [20, 20]
+                    })
+                }).addTo(map).bindPopup("Dustbin: " + dustbinColor);
+            }
+        }
+
+        // Function to place a moving person marker
+        function placeMovingPerson() {
+            const personRadius = 100; 
+            const randomDistance = Math.random() * personRadius;
+            const randomAngle = Math.random() * 360;
+            const personLocation = getNewCoordinates(centerLatLng, randomDistance, randomAngle);
+
+            L.marker(personLocation, {
+                icon: L.divIcon({
+                    className: 'person-icon',
+                    html: `<div style="background-color: blue; width: 15px; height: 15px; border-radius: 50%;"></div>`,
+                    iconSize: [20, 20]
+                })
+            }).addTo(map).bindPopup("Person");
+        }
+
+        // Fetch the integer array and place markers
+        fetch('results.txt')
+            .then(response => response.text())
+            .then(data => {
+                const integerArray = data.trim().split('').map(char => {
+                    const number = parseInt(char, 10);
+                    return !isNaN(number) ? number : null;
+                }).filter(num => num !== null);
+
+                // Place random dustbins and person marker
+                placeRandomDustbins(integerArray);
+                placeMovingPerson();
+            })
+            .catch(error => console.error('Error fetching file:', error));
+
+        // Add recenter button control
+        L.Control.Recenter = L.Control.extend({
+            onAdd: function(map) {
+                var div = L.DomUtil.create('div', 'leaflet-control-custom recenter-btn');
+                div.innerHTML = '<button onclick="map.setView(originalCenter, 16)">Recenter</button>';
+                return div;
+            }
+        });
+
+        L.control.recenter = function(opts) {
+            return new L.Control.Recenter(opts);
+        }
+
+        L.control.recenter({ position: 'bottomleft' }).addTo(map);
+
+        // Add navigation buttons control
+        L.Control.Compass = L.Control.extend({
+            onAdd: function(map) {
+                var div = L.DomUtil.create('div', 'leaflet-control-custom compass-controls');
+                div.innerHTML = `
+                    <button onclick="map.panBy([0, -100])">North</button>
+                    <button onclick="map.panBy([100, 0])">East</button>
+                    <button onclick="map.panBy([-100, 0])">West</button>
+                    <button onclick="map.panBy([0, 100])">South</button>
+                `;
+                return div;
+            }
+        });
+
+        L.control.compass = function(opts) {
+            return new L.Control.Compass(opts);
+        }
+
+        L.control.compass({ position: 'topright' }).addTo(map);
+    </script>
+</body>
+</html>

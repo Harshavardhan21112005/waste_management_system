@@ -126,6 +126,8 @@
             return degrees * Math.PI / 180;
         }
 
+
+
         // Function to calculate new coordinates given a center point, distance, and bearing
         function getNewCoordinates(center, distance, angle) {
             const earthRadius = 6371000; // Radius of Earth in meters
@@ -144,6 +146,7 @@
 
         // Function to place random dustbins across the entire circle
         function placeRandomDustbins() {
+
             const totalRadius = 200; // Total radius (200 meters)
             const minInterval = 30.48; // Minimum distance (100 feet)
             const maxInterval = 182.88; // Maximum distance (600 feet)
@@ -185,7 +188,6 @@
                 })
             }).addTo(map).bindPopup("Person");
         }
-
         // Call functions to place dustbins and person
         placeRandomDustbins();
         placeMovingPerson();
