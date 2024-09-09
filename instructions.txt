@@ -1,0 +1,24 @@
+Instructions for Running the Code
+1.	Copy the Python Code:
+•	Open the provided test.py file and copy its contents into your VS Code editor.
+2. Test the Dataset:
+•	Ensure you have a dataset with at least 10 images for optimal results. Use this dataset for testing the Python script.
+3.  Copy the HTML Code:
+•	Copy the provided HTML code and paste it into a file named work.html within your project folder in VS Code.
+	4. Start the Local Server:
+•	Open PowerShell (or any terminal) and navigate to your project directory. Start a local server by typing the following command:
+python -m http.server 8000
+
+5. Access the Webpage:
+•	Open any web browser and type the following URL:
+http://localhost:8000/fron_backend.html
+
+6. Perform a Hard Refresh:
+•	Once the page loads, perform a hard refresh to ensure all resources are properly loaded. You can do this by pressing:
+
+Ctrl + Shift + R
+	
+
+
+
+
